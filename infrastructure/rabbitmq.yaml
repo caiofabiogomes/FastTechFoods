@@ -1,0 +1,153 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: rabbitmq-pv
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /run/desktop/mnt/host/c/rabbitmq-data
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: hostpath
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rabbitmq-pvc
+spec:
+  volumeName: rabbitmq-pv
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zabbix-agent-config
+data:
+  zabbix_agentd.conf: |
+    Server=0.0.0.0/0
+    ServerActive=zabbix-zabbix-server
+    Hostname=rabbitmq-container
+    ListenPort=10050
+    ListenIP=0.0.0.0
+    LogType=console
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq-deployment
+  labels:
+    app: rabbitmq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      hostname: rabbitmq
+      containers:
+        - name: rabbitmq
+          image: masstransit/rabbitmq
+          ports:
+            - containerPort: 5672
+            - containerPort: 15672
+          env:
+            - name: RABBITMQ_NODENAME
+              value: rabbit@rabbitmq
+            - name: RABBITMQ_DEFAULT_USER
+              value: "guest"
+            - name: RABBITMQ_DEFAULT_PASS
+              value: "guest"
+            - name: RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS
+              value: "+K true +A128 +P 1048576"  # Aumenta threads e processos do Erlang
+          resources:
+            requests:
+              cpu: "2000m"
+              memory: "4Gi"
+            limits:
+              cpu: "4"
+              memory: "16Gi"
+          volumeMounts:
+            - name: rabbitmq-storage
+              mountPath: /var/lib/rabbitmq
+          livenessProbe:
+            exec:
+              command:
+                - rabbitmqctl
+                - status
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - rabbitmqctl
+                - status
+            initialDelaySeconds: 10
+            periodSeconds: 5
+        - name: zabbix-agent
+          image: zabbix/zabbix-agent:alpine-6.0-latest
+          volumeMounts:
+            - name: zabbix-agent-config
+              mountPath: /etc/zabbix/zabbix_agentd.conf
+              subPath: zabbix_agentd.conf
+          ports:
+            - containerPort: 10050
+      volumes:
+        - name: rabbitmq-storage
+          persistentVolumeClaim:
+            claimName: rabbitmq-pvc
+        - name: zabbix-agent-config
+          configMap:
+            name: zabbix-agent-config
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-service
+spec:
+  type: NodePort
+  selector:
+    app: rabbitmq
+  ports:
+    - name: amqp
+      port: 5672        
+      targetPort: 5672
+      nodePort: 31001    
+    - name: management
+      port: 15672
+      targetPort: 15672
+      nodePort: 31002
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-zabbix-agent-service
+spec:
+  selector:
+    app: rabbitmq
+  ports:
+  - protocol: TCP
+    port: 10050
+    targetPort: 10050
+  type: ClusterIP

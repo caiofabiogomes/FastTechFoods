@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: orderservice-configmap
+data:
+  rabbitmq_host: "rabbitmq-service"
+  cn_db: "Server=sqlserver-service;Database=OrdersDb;User Id=sa;Password=YourStrong!Password;TrustServerCertificate=True"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zabbix-agent-config
+data:
+  zabbix_agentd.conf: |
+    Server=0.0.0.0/0
+    ServerActive=zabbix-zabbix-server
+    Hostname=orderservice-container
+    ListenPort=10050
+    ListenIP=0.0.0.0
+    LogType=console
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orderservice-deployment
+  labels:
+    app: orderservice
+  annotations:
+    type: "consumer"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orderservice
+  template:
+    metadata:
+      labels:
+        app: orderservice
+    spec:
+      containers:
+      - name: orderservice
+        image: caiofabiogomes/order-service-fiap:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: RABBITMQ_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: orderservice-configmap
+              key: rabbitmq_host
+        - name: CONNECTION_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: orderservice-configmap
+              key: cn_db
+      - name: zabbix-agent
+        image: zabbix/zabbix-agent:alpine-6.0-latest
+        volumeMounts:
+        - name: zabbix-agent-config
+          mountPath: /etc/zabbix/zabbix_agentd.conf
+          subPath: zabbix_agentd.conf
+        ports:
+        - containerPort: 10050
+
+      volumes: 
+      - name: zabbix-agent-config
+        configMap:
+          name: zabbix-agent-config
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: orderservice-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: orderservice
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orderservice-zabbix-agent-service
+spec:
+  selector:
+    app: orderservice
+  ports:
+  - protocol: TCP
+    port: 10050
+    targetPort: 10050
+  type: ClusterIP

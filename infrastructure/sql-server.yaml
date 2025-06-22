@@ -44,7 +44,7 @@ metadata:
   name: zabbix-agent-config
 data:
   zabbix_agentd.conf: |
-    Server=
+    Server=0.0.0.0/0
     ServerActive=zabbix-zabbix-server
     Hostname=sqlserver-container
     ListenPort=10050
