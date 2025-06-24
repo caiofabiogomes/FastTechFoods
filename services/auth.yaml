@@ -4,7 +4,7 @@ metadata:
   name: authservice-configmap
 data:
   rabbitmq_host: "rabbitmq-service"
-  cn_db: "Server=sqlserver-service;Database=OrdersDb;User Id=sa;Password=YourStrong!Password;TrustServerCertificate=True"
+  cn_db: "Server=sqlserver-service;Database=AuthDb;User Id=sa;Password=YourStrong!Password;TrustServerCertificate=True"
 
 ---
 apiVersion: v1

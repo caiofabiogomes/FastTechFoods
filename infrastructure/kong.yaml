@@ -13,7 +13,16 @@ data:
         protocol: http
         routes:
           - name: orderservice-service
-            paths: ["/"]
+            paths: ["/orders"]
+            protocols:
+              - http
+      - name: authservice-service
+        host: authservice-service
+        port: 8080
+        protocol: http
+        routes:
+          - name: authservice-service
+            paths: ["/auth"]
             protocols:
               - http
 
