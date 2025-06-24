@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authservice-configmap
+data:
+  rabbitmq_host: "rabbitmq-service"
+  cn_db: "Server=sqlserver-service;Database=OrdersDb;User Id=sa;Password=YourStrong!Password;TrustServerCertificate=True"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zabbix-agent-config
+data:
+  zabbix_agentd.conf: |
+    Server=0.0.0.0/0
+    ServerActive=zabbix-zabbix-server
+    Hostname=authservice-container
+    ListenPort=10050
+    ListenIP=0.0.0.0
+    LogType=console
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authservice-deployment
+  labels:
+    app: authservice
+  annotations:
+    type: "consumer"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authservice
+  template:
+    metadata:
+      labels:
+        app: authservice
+    spec:
+      containers:
+      - name: authservice
+        image: caiofabiogomes/fast-tech-foods-auth-service:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: RABBITMQ_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: authservice-configmap
+              key: rabbitmq_host
+        - name: CONNECTION_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: authservice-configmap
+              key: cn_db
+      - name: zabbix-agent
+        image: zabbix/zabbix-agent:alpine-6.0-latest
+        volumeMounts:
+        - name: zabbix-agent-config
+          mountPath: /etc/zabbix/zabbix_agentd.conf
+          subPath: zabbix_agentd.conf
+        ports:
+        - containerPort: 10050
+
+      volumes: 
+      - name: zabbix-agent-config
+        configMap:
+          name: zabbix-agent-config
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: authservice-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: authservice
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: authservice-zabbix-agent-service
+spec:
+  selector:
+    app: authservice
+  ports:
+  - protocol: TCP
+    port: 10050
+    targetPort: 10050
+  type: ClusterIP
