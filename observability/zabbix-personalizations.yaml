@@ -1,0 +1,21 @@
+
+postgresql:
+  persistence:
+    enabled: true
+    # Nome do StorageClass que seu cluster Kubernetes usa.
+    # Exemplos: "gp2" na AWS, "standard" no GKE, "managed-premium" no Azure.
+    # Se você não especificar, ele usará o StorageClass padrão do cluster.
+    storageClassName: "local-path"
+    # O modo de acesso. ReadWriteOnce é o padrão para bancos de dados.
+    accessModes:
+      - ReadWriteOnce
+    # Tamanho do volume. Comece com um valor razoável e monitore o uso.
+    size: 4Gi
+
+zabbixServer:
+  persistence:
+    enabled: true
+    storageClassName: "local-path"
+    accessModes:
+      - ReadWriteOnce
+    size: 3Gi

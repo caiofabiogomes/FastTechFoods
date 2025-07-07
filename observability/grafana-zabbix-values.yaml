@@ -32,7 +32,7 @@ grafana:
         orgId: 1
         type: alexanderzobnin-zabbix-app
         access: proxy
-        url: http://zabbix-zabbix-web.observability.svc.cluster.local/api_jsonrpc.php
+        url: http://zabbix-zabbix-web.default.svc.cluster.local/api_jsonrpc.php
         isDefault: true
         version: 6
         jsonData:

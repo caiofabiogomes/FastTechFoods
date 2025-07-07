@@ -25,6 +25,24 @@ data:
             paths: ["/auth"]
             protocols:
               - http
+      - name: manager-menu-service-service
+        host: manager-menu-service-service
+        port: 8080
+        protocol: http
+        routes:
+          - name: manager-menu-service-service
+            paths: ["/managermenu"]
+            protocols:
+              - http
+      - name: kitchen-service-service
+        host: kitchen-service-service
+        port: 8080
+        protocol: http
+        routes:
+          - name: kitchen-service-service
+            paths: ["/kitchen"]
+            protocols:
+              - http
 
     plugins:
       - name: rate-limiting

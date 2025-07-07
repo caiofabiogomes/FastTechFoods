@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kitchen-service-configmap
+data:
+  rabbitmq_host: "rabbitmq-service"
+  cn_db: "mongodb://user:pass@mongodb-service:27017/FastTechFoods-ProductsDB?authSource=admin"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zabbix-agent-config
+data:
+  zabbix_agentd.conf: |
+    Server=0.0.0.0/0
+    ServerActive=zabbix-zabbix-server
+    Hostname=kitchen-service-container
+    ListenPort=10050
+    ListenIP=0.0.0.0
+    LogType=console
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kitchen-service-deployment
+  labels:
+    app: kitchen-service
+  annotations:
+    type: "consumer"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kitchen-service
+  template:
+    metadata:
+      labels:
+        app: kitchen-service
+    spec:
+      containers:
+      - name: kitchen-service
+        image: caiofabiogomes/fast-tech-fiap-kitchen-service:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: RABBITMQ_HOST
+          valueFrom:
+            configMapKeyRef:
+              name:  kitchen-service-configmap
+              key: rabbitmq_host
+        - name: DATABASE_CONNECTION
+          valueFrom:
+            configMapKeyRef:
+              name:  kitchen-service-configmap
+              key: cn_db
+      - name: zabbix-agent
+        image: zabbix/zabbix-agent:alpine-6.0-latest
+        volumeMounts:
+        - name: zabbix-agent-config
+          mountPath: /etc/zabbix/zabbix_agentd.conf
+          subPath: zabbix_agentd.conf
+        ports:
+        - containerPort: 10050
+
+      volumes: 
+      - name: zabbix-agent-config
+        configMap:
+          name: zabbix-agent-config
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: kitchen-service-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: kitchen-service
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kitchen-service-zabbix-agent-service
+spec:
+  selector:
+    app: kitchen-service
+  ports:
+  - protocol: TCP
+    port: 10050
+    targetPort: 10050
+  type: ClusterIP
