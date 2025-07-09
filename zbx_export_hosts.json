@@ -1,0 +1,189 @@
+{
+    "zabbix_export": {
+        "version": "7.0",
+        "host_groups": [
+            {
+                "uuid": "6f6799aa69e844b4b3918f779f2abf08",
+                "name": "Zabbix servers"
+            }
+        ],
+        "hosts": [
+            {
+                "host": "authservice-container",
+                "name": "authservice-container",
+                "templates": [
+                    {
+                        "name": "Linux by Zabbix agent"
+                    },
+                    {
+                        "name": "Zabbix server health"
+                    }
+                ],
+                "groups": [
+                    {
+                        "name": "Zabbix servers"
+                    }
+                ],
+                "interfaces": [
+                    {
+                        "dns": "authservice-zabbix-agent-service",
+                        "interface_ref": "if1"
+                    }
+                ],
+                "inventory": {
+                    "location_lat": "56.95387",
+                    "location_lon": "24.22067"
+                },
+                "inventory_mode": "AUTOMATIC"
+            },
+            {
+                "host": "kong-container",
+                "name": "kong-container",
+                "templates": [
+                    {
+                        "name": "Linux by Zabbix agent"
+                    },
+                    {
+                        "name": "Zabbix server health"
+                    }
+                ],
+                "groups": [
+                    {
+                        "name": "Zabbix servers"
+                    }
+                ],
+                "interfaces": [
+                    {
+                        "dns": "kong-zabbix-agent-service",
+                        "interface_ref": "if1"
+                    }
+                ],
+                "inventory": {
+                    "name": "zabbix-zabbix-server-77bdcdfddc-fnvtr",
+                    "os": "Linux version 6.6.87.2-microsoft-standard-WSL2 (root@439a258ad544) (gcc (GCC) 11.2.0, GNU ld (GNU Binutils) 2.37) #1 SMP PREEMPT",
+                    "location_lat": "56.95387",
+                    "location_lon": "24.22067"
+                },
+                "inventory_mode": "AUTOMATIC"
+            },
+            {
+                "host": "mongo-container",
+                "name": "mongo-container",
+                "templates": [
+                    {
+                        "name": "Linux by Zabbix agent"
+                    },
+                    {
+                        "name": "Zabbix server health"
+                    }
+                ],
+                "groups": [
+                    {
+                        "name": "Zabbix servers"
+                    }
+                ],
+                "interfaces": [
+                    {
+                        "dns": "mongo-zabbix-agent-service",
+                        "interface_ref": "if1"
+                    }
+                ],
+                "inventory": {
+                    "name": "zabbix-zabbix-server-77bdcdfddc-fnvtr",
+                    "os": "Linux version 6.6.87.2-microsoft-standard-WSL2 (root@439a258ad544) (gcc (GCC) 11.2.0, GNU ld (GNU Binutils) 2.37) #1 SMP PREEMPT",
+                    "location_lat": "56.95387",
+                    "location_lon": "24.22067"
+                },
+                "inventory_mode": "AUTOMATIC"
+            },
+            {
+                "host": "orderservice-container",
+                "name": "orderservice-container",
+                "templates": [
+                    {
+                        "name": "Linux by Zabbix agent"
+                    },
+                    {
+                        "name": "Zabbix server health"
+                    }
+                ],
+                "groups": [
+                    {
+                        "name": "Zabbix servers"
+                    }
+                ],
+                "interfaces": [
+                    {
+                        "dns": "orderservice-zabbix-agent-service",
+                        "interface_ref": "if1"
+                    }
+                ],
+                "inventory": {
+                    "location_lat": "56.95387",
+                    "location_lon": "24.22067"
+                },
+                "inventory_mode": "AUTOMATIC"
+            },
+            {
+                "host": "rabbitmq-container",
+                "name": "rabbitmq-container",
+                "templates": [
+                    {
+                        "name": "Linux by Zabbix agent"
+                    },
+                    {
+                        "name": "Zabbix server health"
+                    }
+                ],
+                "groups": [
+                    {
+                        "name": "Zabbix servers"
+                    }
+                ],
+                "interfaces": [
+                    {
+                        "dns": "rabbitmq-zabbix-agent-service",
+                        "interface_ref": "if1"
+                    }
+                ],
+                "inventory": {
+                    "name": "zabbix-zabbix-server-77bdcdfddc-fnvtr",
+                    "os": "Linux version 6.6.87.2-microsoft-standard-WSL2 (root@439a258ad544) (gcc (GCC) 11.2.0, GNU ld (GNU Binutils) 2.37) #1 SMP PREEMPT",
+                    "location_lat": "56.95387",
+                    "location_lon": "24.22067"
+                },
+                "inventory_mode": "AUTOMATIC"
+            },
+            {
+                "host": "sqlserver-container",
+                "name": "sqlserver-container",
+                "templates": [
+                    {
+                        "name": "Linux by Zabbix agent"
+                    },
+                    {
+                        "name": "Zabbix server health"
+                    }
+                ],
+                "groups": [
+                    {
+                        "name": "Zabbix servers"
+                    }
+                ],
+                "interfaces": [
+                    {
+                        "dns": "zabbix-agent-service",
+                        "interface_ref": "if1"
+                    }
+                ],
+                "inventory": {
+                    "name": "zabbix-zabbix-server-77bdcdfddc-fnvtr",
+                    "os": "Linux version 6.6.87.2-microsoft-standard-WSL2 (root@439a258ad544) (gcc (GCC) 11.2.0, GNU ld (GNU Binutils) 2.37) #1 SMP PREEMPT",
+                    "location_lat": "56.95387",
+                    "location_lon": "24.22067"
+                },
+                "inventory_mode": "AUTOMATIC"
+            }
+        ]
+    }
+}

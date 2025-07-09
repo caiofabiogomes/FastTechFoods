@@ -1,11 +1,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: orderservice-configmap
+  name: menu-service-configmap
 data:
   rabbitmq_host: "rabbitmq-service"
-  cn_db: "Server=sqlserver-service;Database=OrdersDb;User Id=sa;Password=YourStrong!Password;TrustServerCertificate=True"
-  URL_PRODUCTS_API: "http://kong-proxy:8000/menu/"
+  cn_db: "mongodb://user:pass@mongodb-service:27017/FastTechFoods-ProductsDB?authSource=admin"
 
 ---
 apiVersion: v1
@@ -16,7 +15,7 @@ data:
   zabbix_agentd.conf: |
     Server=0.0.0.0/0
     ServerActive=zabbix-zabbix-server
-    Hostname=orderservice-container
+    Hostname=menu-service-container
     ListenPort=10050
     ListenIP=0.0.0.0
     LogType=console
@@ -25,42 +24,37 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: orderservice-deployment
+  name: menu-service-deployment
   labels:
-    app: orderservice
+    app: menu-service
   annotations:
     type: "consumer"
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: orderservice
+      app: menu-service
   template:
     metadata:
       labels:
-        app: orderservice
+        app: menu-service
     spec:
       containers:
-      - name: orderservice
-        image: caiofabiogomes/order-service-fiap:latest
+      - name: menu-service
+        image: erickgoldberg/fasttechfoods-productservice:latest
         ports:
         - containerPort: 8080
         env:
         - name: RABBITMQ_HOST
           valueFrom:
             configMapKeyRef:
-              name: orderservice-configmap
+              name:  menu-service-configmap
               key: rabbitmq_host
-        - name: CONNECTION_DATABASE
+        - name: MONGO_DB_CONNECTION
           valueFrom:
             configMapKeyRef:
-              name: orderservice-configmap
+              name:  menu-service-configmap
               key: cn_db
-        - name: URL_PRODUCTS_API
-          valueFrom:
-            configMapKeyRef:
-              name: orderservice-configmap
-              key: URL_PRODUCTS_API
       - name: zabbix-agent
         image: zabbix/zabbix-agent:alpine-6.0-latest
         volumeMounts:
@@ -79,24 +73,24 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: orderservice-service
+  name: menu-service-service
 spec:
   type: ClusterIP
   ports:
     - port: 8080
       targetPort: 8080
   selector:
-    app: orderservice
+    app: menu-service
 
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: orderservice-zabbix-agent-service
+  name: menu-service-zabbix-agent-service
 spec:
   selector:
-    app: orderservice
+    app: menu-service
   ports:
   - protocol: TCP
     port: 10050

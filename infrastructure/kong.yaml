@@ -43,6 +43,15 @@ data:
             paths: ["/kitchen"]
             protocols:
               - http
+      - name: menu-service-service
+        host: menu-service-service
+        port: 8080
+        protocol: http
+        routes:
+          - name: menu-service-service
+            paths: ["/menu"]
+            protocols:
+              - http
 
     plugins:
       - name: rate-limiting
