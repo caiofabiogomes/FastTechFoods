@@ -1,8 +1,8 @@
 # FastTech Foods Hackathon - Postgraduate in .NET Systems Architecture
 
-This repository centralizes the Kubernetes manifest files for deploying the infrastructure and microservices of the FastTech Foods project.
+This was the final project for the [**Postgraduate course in .NET Systems Architecture**.](https://postech.fiap.com.br/curso/arquitetura-sistemas-net/) The goal was build a proprietary digital platform for the FastTech Foods, focusing on scalability, observability, security, and automation. The solution replaces third-party tools to modernize and scale customer service and ordering services.
 
-The project was developed as part of the challenge for the [**Postgraduate course in .NET Systems Architecture**.](https://postech.fiap.com.br/curso/arquitetura-sistemas-net/) The goal is to build a proprietary digital platform for the FastTech Foods, focusing on scalability, observability, security, and automation. The solution replaces third-party tools to modernize and scale customer service and ordering services.
+This repository centralizes the Kubernetes manifest files for deploying the infrastructure and microservices of the FastTech Foods project.
 
 ## Technologies Used
 - **.NET 8.0**
@@ -41,3 +41,10 @@ This repository contains all the necessary manifest files (`.yaml`) to deploy th
 To test the Api routes, import the Postman collection:
 [Download](./postman/FastTechFoods.postman_collection.json)
 
+## Colaborators
+We would like to thank all the contributors to this project:
+- [@caiofabiogomes](https://github.com/caiofabiogomes)
+- [@ErickGoldberg](https://github.com/ErickGoldberg)
+- [@mauro_benitez](https://github.com/Mauro-Benitez)
+- [@bribeiro1](https://github.com/bribeiro1)
+- [@ffvieira](https://github.com/ffvieira)
