@@ -5,7 +5,6 @@ This repository centralizes the Kubernetes manifest files for deploying the infr
 The project was developed as part of the challenge for the [**Postgraduate course in .NET Systems Architecture**.](https://postech.fiap.com.br/curso/arquitetura-sistemas-net/) The goal is to build a proprietary digital platform for the FastTech Foods, focusing on scalability, observability, security, and automation. The solution replaces third-party tools to modernize and scale customer service and ordering services.
 
 ## Technologies Used
-The proposed solution must include the following technical aspects:
 - **.NET 8.0**
 - **Microservices Architecture**
 - **Docker**
