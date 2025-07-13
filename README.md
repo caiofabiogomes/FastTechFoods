@@ -21,7 +21,7 @@ The solution's architecture is based on Domain-Driven Design (DDD) and microserv
 
 1.  **Identity and Access**: Responsible for authenticating customers and employees.
 2.  **Product Catalog - Manager**: Manages the registration, editing, and querying of menu items.
-3.  **Product Catalog - Customer**:  Allows the customer to search for available products with filters like (Snacks, Juices , etc).
+3.  **Product Catalog - Customer**:  Allows the customer to search for available products with filters like (Snacks, Juices, etc).
 4.  **Orders**: Orchestrates the creation, processing, and cancellation of orders placed by customers.
 5.  **Kitchen**: Manages the receipt and preparation flow of orders, allowing the kitchen staff to accept or reject items.
 
