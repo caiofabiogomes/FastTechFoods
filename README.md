@@ -37,3 +37,7 @@ Each microservice has its own repository, promoting team autonomy and maintainab
 ## Kubernetes Environment Setup
 This repository contains all the necessary manifest files (`.yaml`) to deploy the complete environment in a Kubernetes cluster.
 
+## Postman Collection
+For test the Api routes, import the Postman collection:
+[Download](./postman/FastTechFoods.postman_collection.json)
+
