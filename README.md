@@ -28,10 +28,11 @@ The solution's architecture is based on Domain-Driven Design (DDD) and microserv
 ## Microservices Repositories
 Each microservice has its own repository, promoting team autonomy and maintainability.
 
-- **Identity and Access API:** [fasttech-auth-api](https://github.com/bribeiro1/FastTechFoods.AuthService)
+
+- **Orders API:** [fasttech-ordering-api](https://github.com/caiofabiogomes/OrderService)
 - **Catalog API (Write/Admin):** [fasttech-catalog-write-api](https://github.com/Mauro-Benitez/FastTechFoods.ProductsManagerService)
 - **Catalog API (Read/Client):** [fasttech-catalog-read-api](https://github.com/ErickGoldberg/FastTechFoods.ProductsService)
-- **Orders API:** [fasttech-ordering-api](https://github.com/caiofabiogomes/OrderService)
+- **Identity and Access API:** [fasttech-auth-api](https://github.com/bribeiro1/FastTechFoods.AuthService)
 - **Kitchen API:** [fasttech-kitchen-api](https://github.com/ffvieira/KitchenService)
 
 ## Kubernetes Environment Setup
