@@ -1,0 +1,63 @@
+_format_version: "3.0"
+
+services:
+  - name: orderservice-service
+    host: orderservice
+    port: 8080
+    protocol: http
+    routes:
+      - name: orderservice-service
+        paths: ["/orders"]
+        protocols:
+          - http
+  - name: authservice-service
+    host: authservice
+    port: 8080
+    protocol: http
+    routes:
+      - name: authservice-service
+        paths: ["/auth"]
+        protocols:
+          - http
+  - name: manager-menu-service-service
+    host: manager-menu-service
+    port: 8080
+    protocol: http
+    routes:
+      - name: manager-menu-service-service
+        paths: ["/managermenu"]
+        protocols:
+          - http
+  - name: kitchen-service-service
+    host: kitchen-service
+    port: 8080
+    protocol: http
+    routes:
+      - name: kitchen-service-service
+        paths: ["/kitchen"]
+        protocols:
+          - http
+  - name: menu-service-service
+    host: menu-service
+    port: 8080
+    protocol: http
+    routes:
+      - name: menu-service-service
+        paths: ["/menu"]
+        protocols:
+          - http
+
+plugins:
+  - name: rate-limiting
+    config:
+      second: 5 
+      minute: 10
+      hour: 1000
+      limit_by: consumer
+  - name: prometheus
+    config:
+      per_consumer: true
+      status_code_metrics: true
+      latency_metrics: true
+      bandwidth_metrics: true
+      upstream_health_metrics: true

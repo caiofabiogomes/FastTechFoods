@@ -1,0 +1,192 @@
+version: '3.8'
+
+services:
+  # Infrastructure
+  mongodb-service:
+    image: mongo:latest
+    container_name: mongodb-service
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=user
+      - MONGO_INITDB_ROOT_PASSWORD=pass
+
+  rabbitmq-service:
+    image: masstransit/rabbitmq
+    container_name: rabbitmq-service
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+  sqlserver-service:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver-service
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong!Password
+      - MSSQL_PID=Express
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "YourStrong!Password", "-C", "-Q", "SELECT 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+
+  kong-proxy:
+    image: kong:3.8
+    container_name: kong-proxy
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    environment:
+      - KONG_DATABASE=off
+      - KONG_DECLARATIVE_CONFIG=/etc/kong/kong.yml
+      - KONG_PROXY_ACCESS_LOG=/dev/stdout
+      - KONG_ADMIN_ACCESS_LOG=/dev/stdout
+      - KONG_PROXY_ERROR_LOG=/dev/stderr
+      - KONG_ADMIN_ERROR_LOG=/dev/stderr
+      - KONG_ADMIN_LISTEN=0.0.0.0:8001
+    volumes:
+      - ./kong/kong.yml:/etc/kong/kong.yml
+
+  # Microservices
+  authservice:
+    image: caiofabiogomes/fast-tech-foods-auth-service:latest
+    container_name: authservice
+    ports:
+      - "8081:8080"
+    environment:
+      - RABBITMQ_HOST=rabbitmq-service
+      - CONNECTION_DATABASE=Server=sqlserver-service;Database=AuthDb;User Id=sa;Password=YourStrong!Password;TrustServerCertificate=True
+    depends_on:
+      rabbitmq-service:
+        condition: service_healthy
+      sqlserver-service:
+        condition: service_healthy
+
+  kitchen-service:
+    image: fasttech-kitchen-service-api:local
+    container_name: kitchen-service
+    ports:
+      - "8082:8080"
+    environment:
+      - RABBITMQ_HOST=rabbitmq-service
+      - DATABASE_CONNECTION=mongodb://user:pass@mongodb-service:27017/FastTechFoods-ProductsDB?authSource=admin
+      - CONNECTION_OPENTELEMETRY=http://otel-collector:4317/
+      - CONNECTION_LOKI=http://loki:3100/
+    depends_on:
+      rabbitmq-service:
+        condition: service_healthy
+      mongodb-service:
+        condition: service_started 
+
+  manager-menu-service:
+    image: fasttech-productsmanagerservice-api:local
+    container_name: manager-menu-service
+    ports:
+      - "8083:8080"
+    environment:
+      - RABBITMQ_HOST=rabbitmq-service
+      - CONNECTION_DATABASE=Server=sqlserver-service;Database=ManagerMenuDb;User Id=sa;Password=YourStrong!Password;TrustServerCertificate=True
+      - CONNECTION_OPENTELEMETRY=http://otel-collector:4317/
+      - CONNECTION_LOKI=http://loki:3100/
+    depends_on:
+      rabbitmq-service:
+        condition: service_healthy
+      sqlserver-service:
+        condition: service_healthy
+
+  menu-service:
+    image: fasttech-productsservice-api:local
+    container_name: menu-service
+    ports:
+      - "8084:8080"
+    environment:
+      - RABBITMQ_HOST=rabbitmq-service
+      - MONGO_DB_CONNECTION=mongodb://user:pass@mongodb-service:27017/FastTechFoods-ProductsDB?authSource=admin
+      - CONNECTION_OPENTELEMETRY=http://otel-collector:4317/
+      - CONNECTION_LOKI=http://loki:3100/
+    depends_on:
+      rabbitmq-service:
+        condition: service_healthy
+      mongodb-service:
+        condition: service_started 
+
+  orderservice:
+    image: fasttech-orders-api:local
+    container_name: orderservice
+    ports:
+      - "8085:8080"
+    environment:
+      - RABBITMQ_HOST=rabbitmq-service
+      - CONNECTION_DATABASE=Server=sqlserver-service;Database=OrdersDb;User Id=sa;Password=YourStrong!Password;TrustServerCertificate=True
+      - URL_PRODUCTS_API=http://kong-proxy:8000/menu/
+      - CONNECTION_OPENTELEMETRY=http://otel-collector:4317/
+      - CONNECTION_LOKI=http://loki:3100/
+    depends_on:
+      rabbitmq-service:
+        condition: service_healthy
+      sqlserver-service:
+        condition: service_healthy
+
+  # Observability
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+      - loki
+    volumes:
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+    
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686" # Porta da interface web (dashboard) do Jaeger
+
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    container_name: otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317" # A porta que suas APIs .NET vão chamar
+    depends_on:
+      - jaeger
